@@ -6,40 +6,41 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 13:32:36 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/10/24 18:54:46 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/10/25 12:35:43 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <string.h>
 #include <stdio.h>
 
 char	*get_next_line(int fd)
 {
-	ssize_t		bytesread;
-	static char	*strread;
-	static char	*res;
-	// static char	*res_ptr;
-	int			i;
+	ssize_t			size;
+	static char		*buffer;
+	int				newlpos;
+	char			*res;
 
-	i = 0;
-	strread = malloc(BUFFER_SIZE + 1);
-	if (strread == NULL)
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (buffer == NULL)
 		return ("Error allocating memory");
-	bytesread = read(fd, strread, BUFFER_SIZE);
-	strread[bytesread] = '\0';
-	while (*strread)
-	{
-
-	}
-	free(strread);
+	size = read(fd, buffer, BUFFER_SIZE);
+	buffer[size] = '\0';
+	newlpos = ft_strchr(buffer, '\n') - buffer;
+	res = malloc(newlpos + 1);
+	if (res == NULL)
+		return (NULL);
+	ft_strlcpy(res, buffer, newlpos + 1);
+	free(buffer);
+	free(res);
 	return (res);
 }
 
-int	main(void)
-{
-	char	*s;
-
-	s = get_next_line(0);
-	printf("str: %s", s);
-	return (0);
-}
+// int	main(void)
+// {
+// 	char	*s;
+//
+// 	s = get_next_line(0);
+// 	printf("%s", s);
+// 	return (0);
+// }

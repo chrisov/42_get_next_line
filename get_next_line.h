@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 13:34:37 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/10/24 18:21:05 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/10/25 12:35:04 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,11 @@
 
 # include <stdlib.h>
 # include <unistd.h>
+# include <fcntl.h>
 
-char	*get_next_line(int fd);
+unsigned long	ft_strlen(const char str[]);
+size_t			ft_strlcpy(char *dest, const char *src, size_t size);
+char			*get_next_line(int fd);
+char			*ft_strchr(const char *s, int c);
 
 #endif
