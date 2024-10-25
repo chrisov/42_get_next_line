@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dimitris <dimitris@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 13:32:36 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/10/25 12:35:43 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/10/25 21:43:26 by dimitris         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,21 +18,30 @@ char	*get_next_line(int fd)
 {
 	ssize_t			size;
 	static char		*buffer;
-	int				newlpos;
+	int				delpos;
 	char			*res;
 
+	if (fd == -1)
+		return (NULL);
 	buffer = malloc(BUFFER_SIZE + 1);
 	if (buffer == NULL)
-		return ("Error allocating memory");
+		return (NULL);
 	size = read(fd, buffer, BUFFER_SIZE);
+	if (size == -1)
+	{
+		free(buffer);
+		return (NULL);
+	}
 	buffer[size] = '\0';
-	newlpos = ft_strchr(buffer, '\n') - buffer;
-	res = malloc(newlpos + 1);
+	if (ft_strchr(buffer, '\n') != NULL)
+		delpos = ft_strchr(buffer, '\n') - buffer;
+	else
+		delpos = size;
+	res = malloc(delpos);
 	if (res == NULL)
 		return (NULL);
-	ft_strlcpy(res, buffer, newlpos + 1);
+	ft_strlcpy(res, buffer, delpos);
 	free(buffer);
-	free(res);
 	return (res);
 }
 
