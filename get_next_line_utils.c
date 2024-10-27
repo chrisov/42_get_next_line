@@ -3,31 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dimitris <dimitris@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 12:01:26 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/10/26 16:13:30 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/10/27 19:44:01 by dimitris         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-char	*ft_strnstr(const char *big, const char *little, size_t len)
-{
-	if (*little == '\0')
-		return ((char *)big);
-	while (*big && len >= ft_strlen(little))
-	{
-		if (*big == *little)
-		{
-			if (ft_strncmp(big, little, ft_strlen(little)) == 0)
-				return ((char *)big);
-		}
-		big++;
-		len--;
-	}
-	return (NULL);
-}
 
 unsigned long	ft_strlen(const char str[])
 {
@@ -44,23 +27,15 @@ unsigned long	ft_strlen(const char str[])
 	return (len);
 }
 
-size_t	ft_strlcpy(char *dest, const char *src, size_t size)
+char	*ft_strchr(const char *s, int c)
 {
-	size_t	i;
-	size_t	cpy_len;
-
-	i = 0;
-	if (size <= 0)
-		return (ft_strlen(src));
-	if (size <= ft_strlen(src))
-		cpy_len = size - 1;
-	else
-		cpy_len = ft_strlen(src);
-	while (i < cpy_len)
+	while (*s)
 	{
-		dest[i] = src[i];
-		i++;
+		if (*s == c)
+			return ((char *)s);
+		s++;
 	}
-	dest[i] = '\0';
-	return (ft_strlen(src));
+	if (*s == c)
+		return ((char *)s);
+	return (NULL);
 }
