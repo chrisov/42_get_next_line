@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimitris <dimitris@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 13:34:37 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/10/27 19:42:00 by dimitris         ###   ########.fr       */
+/*   Updated: 2024/10/28 16:25:37 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,14 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-size_t			ft_strlcpy(char *dest, const char *src, size_t size);
-int				ft_strncmp(const char *s1, const char *s2, size_t n);
 void			*ft_memmove(void *dst, const void *src, size_t len);
-char			*ft_strchr(const char *s, int c);
+char			*ft_strnstr(const char *big, const char *little, size_t len);
 char			*get_next_line(int fd);
+char			*ft_strndup(const char *s, unsigned long size);
+char			*ft_strjoin(char const *s1, char const *s2);
 unsigned long	ft_strlen(const char str[]);
-
+size_t			ft_strlcpy(char *dest, const char *src, size_t size);
+size_t			ft_strlcat(char *dst, const char *src, size_t dstsize);
+int				ft_strncmp(const char *s1, const char *s2, size_t n);
 
 #endif
