@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 12:01:26 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/10/31 16:26:05 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/01 14:28:56 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,3 +166,4 @@ char    *ft_strchr(const char *s, int c)
                 return ((char *)s);
         return (NULL);
 }
+
