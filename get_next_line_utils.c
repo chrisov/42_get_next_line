@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 12:01:26 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/10/28 16:37:39 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/10/31 16:26:05 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,4 +152,17 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 		s2++;
 	}
 	return (0);
+}
+
+char    *ft_strchr(const char *s, int c)
+{
+        while (*s)
+        {
+                if (*s == c)
+                        return ((char *)s);
+                s++;
+        }
+        if (*s == c)
+                return ((char *)s);
+        return (NULL);
 }
