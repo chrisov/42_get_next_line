@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dimitris <dimitris@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 13:34:37 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/01 14:25:31 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/01 21:15:11 by dimitris         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include <unistd.h>
 
 void			*ft_memmove(void *dst, const void *src, size_t len);
-void		    *ft_memcpy(void *dest, const void *src, size_t n);
+void			*ft_memcpy(void *dest, const void *src, size_t n);
 char			*ft_strnstr(const char *big, const char *little, size_t len);
 char			*get_next_line(int fd);
 char			*ft_strndup(const char *s, unsigned long size);

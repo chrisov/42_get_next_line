@@ -3,85 +3,126 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dimitris <dimitris@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/01 17:13:08 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/02 01:11:17 by dimitris         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stdio.h>
 
 /**
- * @brief Manual implementation of the official getnextline command.
- * @note Remainder buffer and line are the ony mem allocated variables that need freeing.
- * @param bytes The size of the buffer, as indicated by the BUFFER_SIZE variable.
- * @param temp Temporary buffer that the whole content written to the descriptor.
- * @param buffer The main buffer variable, initialized as temp and from which remainder is extracted.
- * @param line The return value when there is content written to the descriptor.
+ * @brief Manual implementation of the official getline command.
+ * 
+ * @note The 1char edge case needs special treatment, using char instead of *char.
+ * 
+ * @param append_bytes The size of the buffer,
+ * @param to_append Appends <=BUFFER_SIZE data to the buffer.
+ * @param buffer The main buffer, which is searched for the \\n, 
+ * after each repetition of the while loop.
+ * @param temp Used to temporarily store the value of buffer, before its resizing.
+ * @param line Contains data written up to the \\n found in the buffer.
+ * 
  * @returns The string contained in the variable named line.
  */
 char	*get_next_line(int fd)
 {
-	ssize_t		bytes;
-	static char	*remainder;
+	ssize_t		append_bytes;
+	ssize_t		total_size;
+	char		to_append[BUFFER_SIZE];
+	char		*temp;
 	static char	*buffer;
 	char		*line;
-	char		*delpos;
+	static char	*delpos;
 
 	if (fd == -1 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (NULL);
-	if (buffer == NULL)
+	// if (BUFFER_SIZE == 1)
+	// {
+
+	// }
+	append_bytes = read(fd, to_append, BUFFER_SIZE);
+	if (append_bytes <= 0)
+		return (NULL);
+	if (!delpos)
 	{
-		buffer = malloc(BUFFER_SIZE + 1);
-		if (buffer == NULL)
-			return (NULL);
-	}
-	if (remainder == NULL)
-	{
-		bytes = read(fd, buffer, BUFFER_SIZE);
-		if (bytes <= 0)
-		{
-			free(buffer);
-			buffer = NULL;
-			return (NULL);
-		}
-		buffer[bytes] = '\0';
-	}
-	delpos = ft_strchr(buffer, '\n');
-	if (delpos)
-	{
-		line = ft_strndup(buffer, ft_strlen(delpos) - ft_strlen(buffer) + 1);
-		remainder = ft_strndup(delpos + 1, ft_strlen(delpos + 1));
-		free (buffer);
-		buffer = NULL;
-		return (line);
+		buffer = ft_strndup(to_append, ft_strlen(to_append));
+		total_size = append_bytes;
 	}
 	else
 	{
-		if (buffer && *buffer)
+		temp = ft_strndup(buffer, ft_strlen(buffer));
+		total_size = ft_strlen(temp) + BUFFER_SIZE + 1;
+		free(buffer);
+		buffer = malloc(total_size);
+		if (!buffer)
+			return (NULL);
+		ft_strlcpy(buffer, temp, total_size + 1);
+		ft_strlcat(buffer, to_append, total_size + 1);
+	}
+	while (1)
+	{
+		delpos = ft_strchr(buffer, '\n');
+		if (delpos)
 		{
-			line = ft_strndup(buffer, ft_strlen(buffer));
+			delpos++;
+			line = ft_strndup(buffer, ft_strlen(buffer) - ft_strlen(delpos));
+			ft_strlcpy(buffer, delpos, ft_strlen(delpos) + 1);
+			return (free(temp), line);
+		}
+		append_bytes = read(fd, to_append, BUFFER_SIZE);
+		if (append_bytes <= 0)
+			return (NULL);
+		if (append_bytes <= BUFFER_SIZE)
+		{
+			total_size += append_bytes;
+			temp = ft_strndup(buffer, ft_strlen(buffer));
 			free(buffer);
-			buffer = NULL;
-			return (line);
+			buffer = malloc(total_size + 1);
+			if (!buffer)
+				return (NULL);
+			ft_strlcpy(buffer, temp, total_size + 1);
+			ft_strlcat(buffer, to_append, total_size + 1);
 		}
 	}
-	return (NULL);
+	return (free(temp), free(buffer), free(line), NULL);
 }
-// #include <fcntl.h>
-// #include <stdio.h>
-// int	main(void)
+
+// static char	*one_char_buf(int fd)
 // {
-// 	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/gnlTester/files/multiple_line_with_nl", O_RDONLY);
-// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-// 	char	*s;
+// 	ssize_t	bytes;
+// 	char	c;
+// 	char	*str;
+// 	char	*temp;
 
-// 	// s = NULL;
-// 	// read(fd, s, BUFFER_SIZE);
-// 	// printf("\"%s\"\n", s);
+// 	bytes = read(fd, &c, 1);
+// 	if (!str)
+// 	{
+// 		str = malloc(2);
+// 		ft_strlcpy(str, c, 2);
+// 	}
 
-// 	while ((s = get_next_line(fd)) != NULL)
-// 		printf("\"%s\"\n", s);
-// 	return (0);
+
 // }
+
+
+#include <fcntl.h>
+int	main(void)
+{
+	int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+	char	*s;
+
+	// s = malloc(43);
+	// while ((bytes = read(fd, s, 2)) > 0)
+	// 	printf("%s", s);
+	// s[43] = '\0';
+
+	// printf("%s", get_next_line(fd));
+	while ((s = get_next_line(fd)) != NULL)
+		printf("%s", s);
+	// printf("\"%s\"\n", get_next_line(fd));
+	return (0);
+}
