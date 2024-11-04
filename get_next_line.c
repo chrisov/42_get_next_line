@@ -3,20 +3,40 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimitris <dimitris@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/04 01:00:40 by dimitris         ###   ########.fr       */
+/*   Updated: 2024/11/04 17:26:55 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
+
+/**
+ * @brief frees and reallocates sz bytes for the buff and then assigns it the value of temp + app_str 
+ * 
+ * @param buff the buffer to be resized and reassigned.
+ * @param sz the size of the buffer to fit the values of both the temp and app_str.
+ * @param temp copying of its value to the buffer.
+ * @param app_str appending its value to the buffer.
+ * 
+ * @returns the buffer variable after resizing and reassigning.
+ */
+static char	*buffer_append(char *buff, char *temp, char *app_str, int sz)
+{
+	temp = ft_strndup(buff, ft_strlen(buff));
+	free(buff);
+	buff = malloc(sz);
+	if (buff == NULL)
+		return (NULL);
+	ft_strlcpy(buff, temp, ft_strlen(temp) + 1);
+	ft_strlcat(buff, app_str, sz + 1);
+	free(temp);
+	return (buff);
+}
 
 /**
  * @brief Manual implementation of the official getline command.
- * 
- * @note The 1char edge case needs special treatment, using char instead of *char.
  * 
  * @param append_bytes The size of the buffer,
  * @param to_append Appends <=BUFFER_SIZE data to the buffer.
@@ -31,9 +51,9 @@ char	*get_next_line(int fd)
 {
 	ssize_t		append_bytes;
 	ssize_t		total_size;
-	char		to_append[BUFFER_SIZE];
-	char		*temp;
 	static char	*buffer;
+	char		to_append[BUFFER_SIZE + 1];
+	char		*temp;
 	char		*line;
 	char		*delpos;
 
@@ -44,32 +64,21 @@ char	*get_next_line(int fd)
 		return (NULL);
 	to_append[append_bytes] = '\0';
 	total_size = append_bytes;
-	if (buffer == NULL)
+	temp = NULL;
+	delpos = NULL;
+	if (buffer && *buffer)
 	{
-		if (append_bytes == 0)
-			return (NULL);
-		buffer = ft_strndup(to_append, ft_strlen(to_append));
+		if (append_bytes != 0)								// buff is not empty and there are still data to read
+		{
+			total_size += ft_strlen(buffer);
+			buffer = buffer_append(buffer, temp, to_append, total_size);
+		}
 	}
 	else
 	{
-		if (append_bytes != 0)
-		{
-			total_size += ft_strlen(buffer);
-			temp = ft_strndup(buffer, ft_strlen(buffer));
-			free(buffer);
-			buffer = malloc(total_size);
-			if (buffer == NULL)
-				return (NULL);
-			ft_strlcpy(buffer, temp, ft_strlen(temp) + 1);
-			ft_strlcat(buffer, to_append, total_size + 1);
-		}
-		else
-		{
-			line = ft_strndup(buffer, ft_strlen(buffer));
-			free(buffer);
-			buffer = NULL;
-			return (line);
-		}
+		if (append_bytes == 0)							// the buff is empty and there are no data left to read
+			return (NULL);
+		buffer = ft_strndup(to_append, ft_strlen(to_append));		// initialization of buff
 	}
 	while (1)
 	{
@@ -82,32 +91,38 @@ char	*get_next_line(int fd)
 			free (buffer);
 			buffer = ft_strndup(temp, ft_strlen(temp));
 			delpos = NULL;
-			return (free(temp), line);
+			free(temp);
+			temp = NULL;
+			return (line);
 		}
 		append_bytes = read(fd, to_append, BUFFER_SIZE);
-		if (append_bytes <= 0)
+		if (append_bytes < 0)
 			return (NULL);
 		to_append[append_bytes] = '\0';
 		total_size += append_bytes;
-		temp = ft_strndup(buffer, ft_strlen(buffer));
-		free(buffer);
-		buffer = malloc(total_size);
-		if (buffer == NULL)
+		if (append_bytes == 0)
+		{
+			if (buffer && *buffer)
+			{
+				line = ft_strndup(buffer, ft_strlen(buffer));
+				buffer = NULL;
+				return (line);
+			}
 			return (NULL);
-		ft_strlcpy(buffer, temp, ft_strlen(temp) + 1);
-		ft_strlcat(buffer, to_append, total_size +1);
-		free(temp);
+		}
+		buffer = buffer_append(buffer, temp, to_append, total_size);
 	}
 	free(temp);
 	temp = NULL;
 	return (NULL);
 }
 
+// #include <stdio.h>
 // #include <fcntl.h>
 // int	main(void)
 // {
-// 	int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/only_nl.txt", O_RDONLY);
-// 	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+// 	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/only_nl.txt", O_RDONLY);
+// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/only_nl.txt", O_RDONLY);
 // 	char	*s;
 
 // 	// printf("%s", get_next_line(fd));
