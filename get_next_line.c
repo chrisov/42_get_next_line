@@ -6,7 +6,7 @@
 /*   By: dimitris <dimitris@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/02 01:11:17 by dimitris         ###   ########.fr       */
+/*   Updated: 2024/11/04 01:00:40 by dimitris         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,32 +35,41 @@ char	*get_next_line(int fd)
 	char		*temp;
 	static char	*buffer;
 	char		*line;
-	static char	*delpos;
+	char		*delpos;
 
-	if (fd == -1 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	if (fd == -1 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
 		return (NULL);
-	// if (BUFFER_SIZE == 1)
-	// {
-
-	// }
 	append_bytes = read(fd, to_append, BUFFER_SIZE);
-	if (append_bytes <= 0)
+	if (append_bytes < 0)
 		return (NULL);
-	if (!delpos)
+	to_append[append_bytes] = '\0';
+	total_size = append_bytes;
+	if (buffer == NULL)
 	{
+		if (append_bytes == 0)
+			return (NULL);
 		buffer = ft_strndup(to_append, ft_strlen(to_append));
-		total_size = append_bytes;
 	}
 	else
 	{
-		temp = ft_strndup(buffer, ft_strlen(buffer));
-		total_size = ft_strlen(temp) + BUFFER_SIZE + 1;
-		free(buffer);
-		buffer = malloc(total_size);
-		if (!buffer)
-			return (NULL);
-		ft_strlcpy(buffer, temp, total_size + 1);
-		ft_strlcat(buffer, to_append, total_size + 1);
+		if (append_bytes != 0)
+		{
+			total_size += ft_strlen(buffer);
+			temp = ft_strndup(buffer, ft_strlen(buffer));
+			free(buffer);
+			buffer = malloc(total_size);
+			if (buffer == NULL)
+				return (NULL);
+			ft_strlcpy(buffer, temp, ft_strlen(temp) + 1);
+			ft_strlcat(buffer, to_append, total_size + 1);
+		}
+		else
+		{
+			line = ft_strndup(buffer, ft_strlen(buffer));
+			free(buffer);
+			buffer = NULL;
+			return (line);
+		}
 	}
 	while (1)
 	{
@@ -68,61 +77,41 @@ char	*get_next_line(int fd)
 		if (delpos)
 		{
 			delpos++;
+			temp = ft_strndup(delpos, ft_strlen(delpos));
 			line = ft_strndup(buffer, ft_strlen(buffer) - ft_strlen(delpos));
-			ft_strlcpy(buffer, delpos, ft_strlen(delpos) + 1);
+			free (buffer);
+			buffer = ft_strndup(temp, ft_strlen(temp));
+			delpos = NULL;
 			return (free(temp), line);
 		}
 		append_bytes = read(fd, to_append, BUFFER_SIZE);
 		if (append_bytes <= 0)
 			return (NULL);
-		if (append_bytes <= BUFFER_SIZE)
-		{
-			total_size += append_bytes;
-			temp = ft_strndup(buffer, ft_strlen(buffer));
-			free(buffer);
-			buffer = malloc(total_size + 1);
-			if (!buffer)
-				return (NULL);
-			ft_strlcpy(buffer, temp, total_size + 1);
-			ft_strlcat(buffer, to_append, total_size + 1);
-		}
+		to_append[append_bytes] = '\0';
+		total_size += append_bytes;
+		temp = ft_strndup(buffer, ft_strlen(buffer));
+		free(buffer);
+		buffer = malloc(total_size);
+		if (buffer == NULL)
+			return (NULL);
+		ft_strlcpy(buffer, temp, ft_strlen(temp) + 1);
+		ft_strlcat(buffer, to_append, total_size +1);
+		free(temp);
 	}
-	return (free(temp), free(buffer), free(line), NULL);
+	free(temp);
+	temp = NULL;
+	return (NULL);
 }
 
-// static char	*one_char_buf(int fd)
+// #include <fcntl.h>
+// int	main(void)
 // {
-// 	ssize_t	bytes;
-// 	char	c;
-// 	char	*str;
-// 	char	*temp;
+// 	int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/only_nl.txt", O_RDONLY);
+// 	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+// 	char	*s;
 
-// 	bytes = read(fd, &c, 1);
-// 	if (!str)
-// 	{
-// 		str = malloc(2);
-// 		ft_strlcpy(str, c, 2);
-// 	}
-
-
+// 	// printf("%s", get_next_line(fd));
+// 	while ((s = get_next_line(fd)) != NULL)
+// 		printf("%s", s);
+// 	return (0);
 // }
-
-
-#include <fcntl.h>
-int	main(void)
-{
-	int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-	char	*s;
-
-	// s = malloc(43);
-	// while ((bytes = read(fd, s, 2)) > 0)
-	// 	printf("%s", s);
-	// s[43] = '\0';
-
-	// printf("%s", get_next_line(fd));
-	while ((s = get_next_line(fd)) != NULL)
-		printf("%s", s);
-	// printf("\"%s\"\n", get_next_line(fd));
-	return (0);
-}
