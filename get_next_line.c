@@ -6,33 +6,64 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/04 17:26:55 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/05 19:12:28 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
+
 /**
- * @brief frees and reallocates sz bytes for the buff and then assigns it the value of temp + app_str 
+ * @brief When a del is found, it returns the buffer up to the \\n.
+ * 
+ * @param temp Stores the value of del temporarily.
+ * @param result Same as buffer, up to and including the \\n.
+ * 
+ * @returns result
+ */
+static char	*line_found(char **buff, char *del)
+{
+	char	*temp;
+	char	*result;
+
+	del++;
+	temp = ft_strndup(del, ft_strlen(del));
+	result = ft_strndup(*buff, ft_strlen(*buff) - ft_strlen(temp));
+	free(*buff);
+	*buff = ft_strndup(temp, ft_strlen(temp));
+	free(temp);
+	temp = NULL;
+	return (result);
+}
+
+/**
+ * @brief frees and reallocates sz bytes for the buff and 
+ * then assigns it the value of temp + app_str 
  * 
  * @param buff the buffer to be resized and reassigned.
- * @param sz the size of the buffer to fit the values of both the temp and app_str.
+ * @param sz the size of the buffer to fit the values of
+ * both the temp and app_str.
  * @param temp copying of its value to the buffer.
  * @param app_str appending its value to the buffer.
  * 
  * @returns the buffer variable after resizing and reassigning.
  */
-static char	*buffer_append(char *buff, char *temp, char *app_str, int sz)
+static char	*buffer_append(char **buff, char *app_str, int sz)
 {
-	temp = ft_strndup(buff, ft_strlen(buff));
-	free(buff);
-	buff = malloc(sz);
-	if (buff == NULL)
+	char	*temp;
+
+	temp = ft_strndup(*buff, ft_strlen(*buff));
+	free(*buff);
+	*buff = malloc(sz + 1);
+	if (*buff == NULL)
+	{
+		free(temp);
 		return (NULL);
-	ft_strlcpy(buff, temp, ft_strlen(temp) + 1);
-	ft_strlcat(buff, app_str, sz + 1);
+	}
+	ft_strlcpy(*buff, temp, ft_strlen(temp) + 1);
+	ft_strlcat(*buff, app_str, sz + 1);
 	free(temp);
-	return (buff);
+	return (*buff);
 }
 
 /**
@@ -42,7 +73,8 @@ static char	*buffer_append(char *buff, char *temp, char *app_str, int sz)
  * @param to_append Appends <=BUFFER_SIZE data to the buffer.
  * @param buffer The main buffer, which is searched for the \\n, 
  * after each repetition of the while loop.
- * @param temp Used to temporarily store the value of buffer, before its resizing.
+ * @param temp Used to temporarily store the value of buffer, before 
+ * its resizing.
  * @param line Contains data written up to the \\n found in the buffer.
  * 
  * @returns The string contained in the variable named line.
@@ -53,7 +85,6 @@ char	*get_next_line(int fd)
 	ssize_t		total_size;
 	static char	*buffer;
 	char		to_append[BUFFER_SIZE + 1];
-	char		*temp;
 	char		*line;
 	char		*delpos;
 
@@ -62,71 +93,52 @@ char	*get_next_line(int fd)
 	append_bytes = read(fd, to_append, BUFFER_SIZE);
 	if (append_bytes < 0)
 		return (NULL);
-	to_append[append_bytes] = '\0';
-	total_size = append_bytes;
-	temp = NULL;
-	delpos = NULL;
-	if (buffer && *buffer)
+	if (append_bytes == 0)
 	{
-		if (append_bytes != 0)								// buff is not empty and there are still data to read
-		{
-			total_size += ft_strlen(buffer);
-			buffer = buffer_append(buffer, temp, to_append, total_size);
-		}
-	}
-	else
-	{
-		if (append_bytes == 0)							// the buff is empty and there are no data left to read
+		if (!(buffer && *buffer))
 			return (NULL);
-		buffer = ft_strndup(to_append, ft_strlen(to_append));		// initialization of buff
-	}
-	while (1)
-	{
-		delpos = ft_strchr(buffer, '\n');
-		if (delpos)
+		else
 		{
-			delpos++;
-			temp = ft_strndup(delpos, ft_strlen(delpos));
-			line = ft_strndup(buffer, ft_strlen(buffer) - ft_strlen(delpos));
-			free (buffer);
-			buffer = ft_strndup(temp, ft_strlen(temp));
-			delpos = NULL;
-			free(temp);
-			temp = NULL;
+			line = ft_strndup(buffer, ft_strlen(buffer));
+			buffer = NULL;
 			return (line);
 		}
+	}
+	total_size = append_bytes;
+	if (buffer != NULL)
+		buffer = buffer_append(&buffer, to_append, total_size);
+	else
+		buffer = ft_strndup(to_append, ft_strlen(to_append));
+	delpos = ft_strchr(buffer, '\n');
+	while (!delpos)
+	{
 		append_bytes = read(fd, to_append, BUFFER_SIZE);
 		if (append_bytes < 0)
 			return (NULL);
-		to_append[append_bytes] = '\0';
-		total_size += append_bytes;
 		if (append_bytes == 0)
 		{
-			if (buffer && *buffer)
-			{
-				line = ft_strndup(buffer, ft_strlen(buffer));
-				buffer = NULL;
-				return (line);
-			}
-			return (NULL);
+			line = ft_strndup(buffer, ft_strlen(buffer));
+			buffer = NULL;
+			return (line);
 		}
-		buffer = buffer_append(buffer, temp, to_append, total_size);
+		total_size += append_bytes;
+		buffer = buffer_append(&buffer, to_append, total_size);
+		delpos = ft_strchr(buffer, '\n');
 	}
-	free(temp);
-	temp = NULL;
-	return (NULL);
+	return (line_found(&buffer, delpos));
 }
 
 // #include <stdio.h>
 // #include <fcntl.h>
 // int	main(void)
 // {
-// 	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/only_nl.txt", O_RDONLY);
-// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/only_nl.txt", O_RDONLY);
+// 	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+// 	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/variable_nls.txt", O_RDONLY);
 // 	char	*s;
 
 // 	// printf("%s", get_next_line(fd));
 // 	while ((s = get_next_line(fd)) != NULL)
-// 		printf("%s", s);
+// 		printf("\"%s\'", s);
 // 	return (0);
 // }
