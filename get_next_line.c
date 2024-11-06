@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/05 20:32:11 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/06 15:26:16 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,14 +122,14 @@ char	*get_next_line(int fd)
 	total_size = append_bytes;
 	if (append_bytes == 0)
 	{
-		if (!(buffer && *buffer))											// eof and no buff (last step)
+		if (!(buffer && *buffer))
 			return (NULL);
-		else															// eof and still data to the buff (previously to last step)
-			return(delim_found(fd, &buffer, total_size));
+		else
+			return (delim_found(fd, &buffer, total_size));
 	}
-	if (!buffer)														// no eof no data to the buffer (first step)
+	if (!buffer)
 		buffer = ft_strndup(to_append, ft_strlen(to_append));
-	else																// appending to_app to the already not empty buffer
+	else
 		buffer = buffer_append(&buffer, to_append, append_bytes);
 	return (delim_found(fd, &buffer, total_size));
 }
@@ -140,7 +140,7 @@ int	main(void)
 {
 	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
 	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/read_error.txt", O_RDONLY);
+	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
 	char	*s;
 
 	// printf("%s", get_next_line(fd));
