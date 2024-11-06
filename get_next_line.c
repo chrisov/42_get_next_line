@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/06 17:29:58 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/06 18:54:17 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,6 @@ static char	*delim_search(int fd, char **buff, ssize_t size)
 		bytes = read(fd, app_str, BUFFER_SIZE);
 		app_str[bytes] = '\0';
 		size += bytes;
-		*buff = buffer_append(buff, app_str, size);
 		if (bytes < 0)
 			return (NULL);
 		if (bytes == 0)
@@ -87,6 +86,7 @@ static char	*delim_search(int fd, char **buff, ssize_t size)
 			*buff = NULL;
 			return (result);
 		}
+		*buff = buffer_append(buff, app_str, size);
 		remainder = ft_strchr(*buff, '\n');
 	}
 	remainder++;
@@ -110,7 +110,6 @@ static char	*delim_search(int fd, char **buff, ssize_t size)
 char	*get_next_line(int fd)
 {
 	ssize_t		append_bytes;
-	ssize_t		total_size;
 	static char	*buffer;
 	char		to_append[BUFFER_SIZE + 1];
 
@@ -120,22 +119,21 @@ char	*get_next_line(int fd)
 	if (append_bytes < 0)
 		return (NULL);
 	to_append[append_bytes] = '\0';
-	total_size = append_bytes;
 	if (append_bytes == 0)
 	{
 		if (!(buffer && *buffer))
 			return (NULL);
 		else
-			return (delim_search(fd, &buffer, total_size));
+			return (delim_search(fd, &buffer, append_bytes));
 	}
 	if (!buffer)
 		buffer = ft_strndup(to_append, ft_strlen(to_append));
 	else
 	{
-		total_size += ft_strlen(buffer);
-		buffer = buffer_append(&buffer, to_append, total_size);
+		append_bytes += ft_strlen(buffer);
+		buffer = buffer_append(&buffer, to_append, append_bytes);
 	}
-	return (delim_search(fd, &buffer, total_size));
+	return (delim_search(fd, &buffer, append_bytes));
 }
 
 // #include <stdio.h>
@@ -144,11 +142,11 @@ char	*get_next_line(int fd)
 // {
 // 	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
 // 	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/1char.txt", O_RDONLY);
 // 	char	*s;
 
 // 	// printf("%s", get_next_line(fd));
 // 	while ((s = get_next_line(fd)) != NULL)
-// 		printf("%s", s);
+// 		printf("\"%s\'", s);
 // 	return (0);
 // }
