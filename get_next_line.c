@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/06 15:26:16 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/06 17:29:58 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,12 @@
  * 
  * @returns result
  */
-static char	*line_found(char **buff, char *del)
+static char	*line_found(char **buff, char *remainder)
 {
 	char	*temp;
 	char	*result;
 
-	del++;
-	temp = ft_strndup(del, ft_strlen(del));
+	temp = ft_strndup(remainder, ft_strlen(remainder));
 	result = ft_strndup(*buff, ft_strlen(*buff) - ft_strlen(temp));
 	free(*buff);
 	*buff = ft_strndup(temp, ft_strlen(temp));
@@ -66,18 +65,20 @@ static char	*buffer_append(char **buff, char *app_str, int sz)
 	return (*buff);
 }
 
-static char	*delim_found(int fd, char **buff, ssize_t size)
+static char	*delim_search(int fd, char **buff, ssize_t size)
 {
 	ssize_t	bytes;
-	char	*del;
+	char	*remainder;
 	char	app_str[BUFFER_SIZE + 1];
 	char	*result;
 
-	del = ft_strchr(*buff, '\n');
-	while (!del)
+	remainder = ft_strchr(*buff, '\n');
+	while (!remainder)
 	{
 		bytes = read(fd, app_str, BUFFER_SIZE);
 		app_str[bytes] = '\0';
+		size += bytes;
+		*buff = buffer_append(buff, app_str, size);
 		if (bytes < 0)
 			return (NULL);
 		if (bytes == 0)
@@ -86,11 +87,11 @@ static char	*delim_found(int fd, char **buff, ssize_t size)
 			*buff = NULL;
 			return (result);
 		}
-		size += bytes;
-		*buff = buffer_append(buff, app_str, size);
-		del = ft_strchr(*buff, '\n');
+		remainder = ft_strchr(*buff, '\n');
 	}
-	return (line_found(&*buff, del));
+	remainder++;
+	result = line_found(&*buff, remainder);
+	return (result);
 }
 
 /**
@@ -125,26 +126,29 @@ char	*get_next_line(int fd)
 		if (!(buffer && *buffer))
 			return (NULL);
 		else
-			return (delim_found(fd, &buffer, total_size));
+			return (delim_search(fd, &buffer, total_size));
 	}
 	if (!buffer)
 		buffer = ft_strndup(to_append, ft_strlen(to_append));
 	else
-		buffer = buffer_append(&buffer, to_append, append_bytes);
-	return (delim_found(fd, &buffer, total_size));
+	{
+		total_size += ft_strlen(buffer);
+		buffer = buffer_append(&buffer, to_append, total_size);
+	}
+	return (delim_search(fd, &buffer, total_size));
 }
 
-#include <stdio.h>
-#include <fcntl.h>
-int	main(void)
-{
-	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-	char	*s;
+// #include <stdio.h>
+// #include <fcntl.h>
+// int	main(void)
+// {
+// 	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+// 	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+// 	char	*s;
 
-	// printf("%s", get_next_line(fd));
-	while ((s = get_next_line(fd)) != NULL)
-		printf("\"%s\'", s);
-	return (0);
-}
+// 	// printf("%s", get_next_line(fd));
+// 	while ((s = get_next_line(fd)) != NULL)
+// 		printf("%s", s);
+// 	return (0);
+// }
