@@ -6,12 +6,11 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/06 18:54:17 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/06 19:41:15 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
 
 /**
  * @brief When a del is found, it returns the buffer up to the \\n.
@@ -65,6 +64,15 @@ static char	*buffer_append(char **buff, char *app_str, int sz)
 	return (*buff);
 }
 
+/**
+ * @brief Searches the buffer for the \\n.
+ * 
+ * @param app_str Stores the data read from the fd.
+ * @param bytes The bytes read from the fd.
+ * @param result Stores the \\n pointer found in the buffer.
+ *   
+ * @returns Result.
+ */
 static char	*delim_search(int fd, char **buff, ssize_t size)
 {
 	ssize_t	bytes;
@@ -83,6 +91,7 @@ static char	*delim_search(int fd, char **buff, ssize_t size)
 		if (bytes == 0)
 		{
 			result = ft_strndup(*buff, ft_strlen(*buff));
+			free(*buff);
 			*buff = NULL;
 			return (result);
 		}
@@ -122,7 +131,11 @@ char	*get_next_line(int fd)
 	if (append_bytes == 0)
 	{
 		if (!(buffer && *buffer))
+		{
+			free(buffer);
+			buffer = NULL;
 			return (NULL);
+		}
 		else
 			return (delim_search(fd, &buffer, append_bytes));
 	}
@@ -136,17 +149,17 @@ char	*get_next_line(int fd)
 	return (delim_search(fd, &buffer, append_bytes));
 }
 
-// #include <stdio.h>
-// #include <fcntl.h>
-// int	main(void)
-// {
-// 	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-// 	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/1char.txt", O_RDONLY);
-// 	char	*s;
+#include <stdio.h>
+#include <fcntl.h>
+int	main(void)
+{
+	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
+	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/read_error.txt", O_RDONLY);
+	// char	*s;
 
-// 	// printf("%s", get_next_line(fd));
-// 	while ((s = get_next_line(fd)) != NULL)
-// 		printf("\"%s\'", s);
-// 	return (0);
-// }
+	printf("%s", get_next_line(fd));
+	// while ((s = get_next_line(fd)) != NULL)
+		// printf("%s", s);
+	return (0);
+}

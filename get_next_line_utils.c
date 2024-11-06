@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 12:01:26 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/04 17:23:54 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/06 19:06:44 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ char	*ft_strndup(const char *s, unsigned long size)
 	if (size <= ft_strlen(s))
 		len = size;
 	ptr = malloc(len + 1);
-	if (ptr == NULL)
+	if (!ptr)
 		return (NULL);
 	ft_memcpy(ptr, s, len);
 	ptr[len] = '\0';
