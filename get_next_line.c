@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/06 19:41:15 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/07 15:45:50 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ static char	*buffer_append(char **buff, char *app_str, int sz)
 	temp = ft_strndup(*buff, ft_strlen(*buff));
 	free(*buff);
 	*buff = malloc(sz + 1);
-	if (*buff == NULL)
+	if (!*buff)
 	{
 		free(temp);
 		return (NULL);
@@ -84,8 +84,6 @@ static char	*delim_search(int fd, char **buff, ssize_t size)
 	while (!remainder)
 	{
 		bytes = read(fd, app_str, BUFFER_SIZE);
-		app_str[bytes] = '\0';
-		size += bytes;
 		if (bytes < 0)
 			return (NULL);
 		if (bytes == 0)
@@ -95,12 +93,30 @@ static char	*delim_search(int fd, char **buff, ssize_t size)
 			*buff = NULL;
 			return (result);
 		}
+		app_str[bytes] = '\0';
+		size += bytes;
 		*buff = buffer_append(buff, app_str, size);
 		remainder = ft_strchr(*buff, '\n');
 	}
 	remainder++;
-	result = line_found(&*buff, remainder);
-	return (result);
+	return (line_found(&*buff, remainder));
+}
+
+static ssize_t	descriptor_read(int fd, char **buff, char *app_str)
+{
+	ssize_t	bytes;
+
+	if (fd == -1 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
+	{
+		free(*buff);
+		*buff = NULL;
+		return (-1);
+	}
+	bytes = read(fd, app_str, BUFFER_SIZE);
+	if (bytes < 0)
+		return (-1);
+	app_str[bytes] = '\0';
+	return (bytes);
 }
 
 /**
@@ -122,22 +138,16 @@ char	*get_next_line(int fd)
 	static char	*buffer;
 	char		to_append[BUFFER_SIZE + 1];
 
-	if (fd == -1 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
-		return (NULL);
-	append_bytes = read(fd, to_append, BUFFER_SIZE);
+	append_bytes = descriptor_read(fd, &buffer, to_append);
 	if (append_bytes < 0)
 		return (NULL);
-	to_append[append_bytes] = '\0';
-	if (append_bytes == 0)
+	if (!append_bytes)
 	{
-		if (!(buffer && *buffer))
-		{
-			free(buffer);
-			buffer = NULL;
-			return (NULL);
-		}
-		else
+		if (buffer && *buffer)
 			return (delim_search(fd, &buffer, append_bytes));
+		free(buffer);
+		buffer = NULL;
+		return (NULL);
 	}
 	if (!buffer)
 		buffer = ft_strndup(to_append, ft_strlen(to_append));
@@ -147,19 +157,4 @@ char	*get_next_line(int fd)
 		buffer = buffer_append(&buffer, to_append, append_bytes);
 	}
 	return (delim_search(fd, &buffer, append_bytes));
-}
-
-#include <stdio.h>
-#include <fcntl.h>
-int	main(void)
-{
-	// int		fd = open("/home/dimitris/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-	// int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/lines_around_10.txt", O_RDONLY);
-	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/read_error.txt", O_RDONLY);
-	// char	*s;
-
-	printf("%s", get_next_line(fd));
-	// while ((s = get_next_line(fd)) != NULL)
-		// printf("%s", s);
-	return (0);
 }
