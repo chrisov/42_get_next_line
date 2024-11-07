@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 13:34:37 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/04 17:22:58 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/07 15:46:04 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,11 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-void			*ft_memcpy(void *dest, const void *src, size_t n);
 char			*get_next_line(int fd);
 char			*ft_strndup(const char *s, unsigned long size);
 char			*ft_strchr(const char *s, int c);
 size_t			ft_strlcpy(char *dest, const char *src, size_t size);
 size_t			ft_strlcat(char *dst, const char *src, size_t dstsize);
 unsigned long	ft_strlen(const char str[]);
-
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 12:01:26 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/06 19:06:44 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/07 15:45:26 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,37 +29,26 @@ unsigned long	ft_strlen(const char str[])
 	return (len);
 }
 
-void	*ft_memcpy(void *dest, const void *src, size_t n)
-{
-	unsigned char			*d;
-	const unsigned char		*s;
-	size_t					i;
-
-	d = (unsigned char *)dest;
-	s = (const unsigned char *)src;
-	i = 0;
-	if (d == NULL && s == NULL)
-		return (NULL);
-	while (i < n)
-	{
-		d[i] = s[i];
-		i++;
-	}
-	return (dest);
-}
-
 char	*ft_strndup(const char *s, unsigned long size)
 {
 	char			*ptr;
 	unsigned long	len;
+	unsigned long	i;
 
+	i = 0;
 	len = ft_strlen(s);
 	if (size <= ft_strlen(s))
 		len = size;
 	ptr = malloc(len + 1);
 	if (!ptr)
 		return (NULL);
-	ft_memcpy(ptr, s, len);
+	if (!ptr && !s)
+		return (NULL);
+	while (i < len)
+	{
+		ptr[i] = s[i];
+		i++;
+	}
 	ptr[len] = '\0';
 	return (ptr);
 }
@@ -106,13 +95,13 @@ size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
 
 char	*ft_strchr(const char *s, int c)
 {
-        while (*s)
-        {
-                if (*s == c)
-                        return ((char *)s);
-                s++;
-        }
-        if (*s == c)
-                return ((char *)s);
-        return (NULL);
+	while (*s)
+	{
+		if (*s == c)
+			return ((char *)s);
+		s++;
+	}
+	if (*s == c)
+		return ((char *)s);
+	return (NULL);
 }
