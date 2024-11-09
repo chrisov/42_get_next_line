@@ -6,12 +6,12 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/07 15:45:50 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/09 15:44:21 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
+#include <stdio.h>
 /**
  * @brief When a del is found, it returns the buffer up to the \\n.
  * 
@@ -20,17 +20,20 @@
  * 
  * @returns result
  */
-static char	*line_found(char **buff, char *remainder)
+static char	*line_found(char **buff)
 {
-	char	*temp;
+	char	*remainder;
+	char	*temp_remainder;
 	char	*result;
 
-	temp = ft_strndup(remainder, ft_strlen(remainder));
-	result = ft_strndup(*buff, ft_strlen(*buff) - ft_strlen(temp));
+	remainder = ft_strchr(*buff, '\n');
+	remainder++;
+	temp_remainder = ft_strndup(remainder, ft_strlen(remainder));
+	result = ft_strndup(*buff, ft_strlen(*buff) - ft_strlen(temp_remainder));
 	free(*buff);
-	*buff = ft_strndup(temp, ft_strlen(temp));
-	free(temp);
-	temp = NULL;
+	*buff = ft_strndup(temp_remainder, ft_strlen(temp_remainder));
+	free(temp_remainder);
+	temp_remainder = NULL;
 	return (result);
 }
 
@@ -55,6 +58,7 @@ static char	*buffer_append(char **buff, char *app_str, int sz)
 	if (!*buff)
 	{
 		free(temp);
+		temp = NULL;
 		return (NULL);
 	}
 	ft_strlcpy(*buff, temp, ft_strlen(temp) + 1);
@@ -86,7 +90,7 @@ static char	*delim_search(int fd, char **buff, ssize_t size)
 		bytes = read(fd, app_str, BUFFER_SIZE);
 		if (bytes < 0)
 			return (NULL);
-		if (bytes == 0)
+		if (!bytes)
 		{
 			result = ft_strndup(*buff, ft_strlen(*buff));
 			free(*buff);
@@ -98,10 +102,17 @@ static char	*delim_search(int fd, char **buff, ssize_t size)
 		*buff = buffer_append(buff, app_str, size);
 		remainder = ft_strchr(*buff, '\n');
 	}
-	remainder++;
-	return (line_found(&*buff, remainder));
+	return (line_found(&*buff));
 }
 
+/**
+ * @brief Reads from the fd and stores its value to a temporary buffer.
+ * 
+ * @param app_str Temporary buffer.
+ * @param bytes The size of the temporary bufer.
+ * 
+ * @returns The size of the temporary buffer.
+ */
 static ssize_t	descriptor_read(int fd, char **buff, char *app_str)
 {
 	ssize_t	bytes;
@@ -135,8 +146,8 @@ static ssize_t	descriptor_read(int fd, char **buff, char *app_str)
 char	*get_next_line(int fd)
 {
 	ssize_t		append_bytes;
-	static char	*buffer;
 	char		to_append[BUFFER_SIZE + 1];
+	static char	*buffer;
 
 	append_bytes = descriptor_read(fd, &buffer, to_append);
 	if (append_bytes < 0)
@@ -150,7 +161,7 @@ char	*get_next_line(int fd)
 		return (NULL);
 	}
 	if (!buffer)
-		buffer = ft_strndup(to_append, ft_strlen(to_append));
+		buffer = ft_strndup(to_append, append_bytes);
 	else
 	{
 		append_bytes += ft_strlen(buffer);
@@ -158,3 +169,15 @@ char	*get_next_line(int fd)
 	}
 	return (delim_search(fd, &buffer, append_bytes));
 }
+
+// #include <fcntl.h>
+// #include <stdio.h>
+// int	main(void)
+// {
+// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/one_line_no_nls.txt", O_RDONLY);
+// 	char	*s;
+
+// 	while ((s = get_next_line(fd)) != NULL)
+// 		printf("%s", s);
+// 	return (0);
+// }
