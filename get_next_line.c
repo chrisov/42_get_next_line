@@ -6,7 +6,7 @@
 /*   By: dchrysov <dchrysov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 16:11:31 by dchrysov          #+#    #+#             */
-/*   Updated: 2024/11/09 16:01:06 by dchrysov         ###   ########.fr       */
+/*   Updated: 2024/11/11 13:56:05 by dchrysov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,7 @@ char	*get_next_line(int fd)
 
 	append_bytes = descriptor_read(fd, &buffer, to_append);
 	if (append_bytes < 0)
-		return (NULL);
+		return (free(buffer), NULL);
 	if (!append_bytes)
 	{
 		if (buffer && *buffer)
@@ -169,15 +169,3 @@ char	*get_next_line(int fd)
 	}
 	return (delim_search(fd, &buffer, append_bytes));
 }
-
-// #include <fcntl.h>
-// #include <stdio.h>
-// int	main(void)
-// {
-// 	int		fd = open("/Users/dchrysov/francinette/tests/get_next_line/fsoares/one_line_no_nls.txt", O_RDONLY);
-// 	char	*s;
-
-// 	while ((s = get_next_line(fd)) != NULL)
-// 		printf("%s", s);
-// 	return (0);
-// }
